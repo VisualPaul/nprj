@@ -1,0 +1,101 @@
+\documentclass{beamer}
+
+ \usepackage{beamerthemesplit} % // Activate for custom appearance
+ \usecolortheme[snowy]{owl}
+ 
+
+\title{Estimating results of linear elasticity PDE using Gaussian process regression}
+\author{Pavel Shevchuk}
+\date{26 March 2021}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section {Overview}
+\frame
+{
+  \frametitle{Motivation}
+  In engineering tasks we often need to repeatedly re-evaluate PDEs while varying their parameters.
+  
+  Is it possible to reduce computational cost by using machine learning methods to estimate the solution instead of evaluating it?
+}
+
+\section{PDE solution}
+%\subsection{Adversarial attacks}
+\frame
+{
+ \frametitle{Equation}
+  A partial derivative equation describing linear elasticity was chosen: 
+  
+  
+\begin{align*}
+-\nabla\cdot\sigma &= f\hbox{ in }\Omega\\ 
+\sigma &= \lambda\,\hbox{tr}\,(\varepsilon) I + 2\mu\varepsilon\\ 
+\varepsilon &= \frac{1}{2}\left(\nabla u + (\nabla u)^{\top}\right)
+\end{align*}
+where $\mu$ and $\lambda$ are the material elasticity parameters.
+}
+
+%\subsection{Adversarial attacks}
+\frame
+{
+ \frametitle{Parameters}
+  The deflection of the beam under its own weight was considered.  The following parameters were varied:
+  \begin{itemize}
+  \item $\mu$, $\lambda$ - Lomé's parameters, between 0.1 and 5.
+  \item $\rho$ - beam density, between 0.1 and 5.
+  \item $g$ - free fall acceleartion, between 0.004 and 0.036
+  \end{itemize}
+  
+  The length of a beam was set to be 1 and the other dimensions are 0.2.
+  
+  The resulting problem was solved using the finite element method.
+  
+  As a target value, the maximum displacement of the material was used.
+}
+
+\section{Regression and experiments}
+
+\frame
+{
+   \frametitle{Overall setup}
+   For prediction, Gaussian Process Regression was used with RBF kernel and $N(0,1)$ prior.
+   
+   To evaluate the performance, 100 points were chosen. Three values were reported for each point:
+   \begin{itemize}
+   \item absolute difference between the GPR prediction and the FEM-calculated value
+   \item mean standard deviation of the GPR prediction on these points
+   \item logarithm of likelihood of the true values for these points
+   \end{itemize}
+   
+   Two strategies for choosing training points were evaluated: picking parameters randomly and uniformly, and picking 10 parameters randomly and uniformly, but only evaluating FEM on the worst of them in terms of predicted standard deviation.
+}
+
+\frame
+{
+  \frametitle{Average error}
+  \includegraphics[scale=0.3]{prj_ae}
+  }
+\frame
+{
+  \frametitle{Average standard deviation}
+  \includegraphics[scale=0.3]{prj_std}
+  }
+\frame
+{
+  \frametitle{Log likelihood}
+  \includegraphics[scale=0.3]{prj_ll}
+  }
+
+\frame
+{
+\frametitle{Results discussion}
+It is possible to estimate using machine learning methods, functions that are too costly to compute.
+
+Using GPR to create samples for GPR breaks it in practice as well as in theory.
+
+GPR is capable of finding your mesh, you have to be cautious.
+
+}
+\end{document}
